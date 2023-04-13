@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Messages From Android App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='messages.css') }}">
+</head>
+<body>
+    <h1>Messages From Android App</h1> 
+    
+    <div id="button-container">
+        <button id="clear-btn">Clear Messages</button>
+    </div> 
+    <div id="header-container">
+        <div class="header">
+            <div class="message-header date-header">Time</div>
+            <div class="message-header text-header">Message</div>
+        </div>
+    </div>
+    <div id="messages-container">
+        {% for message in messages %}
+            <div class="message">
+                <div class="date">{{ message.date }}</div>
+                <div class="text">{{ message.message }}</div>
+            </div>
+        {% endfor %}
+    </div>
+    <script>
+        const messagesContainer = document.getElementById("messages-container");
+        const headerContainer = document.getElementById("header-container");
+        const headerElement = document.createElement('div');
+        headerElement.classList.add('header');
+        headerContainer.appendChild(headerElement);
+
+        function fetchMessages() {
+            fetch('/messages/json')
+                .then(response => response.json())
+                .then(messages => {
+                    messagesContainer.innerHTML = '';
+                    headerContainer.innerHTML = '';
+                    const headerElement = document.createElement('div');
+                    headerElement.classList.add('header');
+                    const dateHeaderElement = document.createElement('div');
+                    dateHeaderElement.classList.add('message-header');
+                    dateHeaderElement.classList.add('date-header');
+                    dateHeaderElement.textContent = 'Time';
+                    headerElement.appendChild(dateHeaderElement);
+                    const messageHeaderElement = document.createElement('div');
+                    messageHeaderElement.classList.add('message-header');
+                    messageHeaderElement.classList.add('text-header');
+                    messageHeaderElement.textContent = 'Message';
+                    headerElement.appendChild(messageHeaderElement);
+                    headerContainer.appendChild(headerElement);
+                    for (const message of messages) {
+                        const messageElement = document.createElement('div');
+                        messageElement.classList.add('message');
+                        const dateElement = document.createElement('div');
+                        dateElement.classList.add('date');
+                        dateElement.textContent = message.date;
+                        messageElement.appendChild(dateElement);
+                        const messageTextElement = document.createElement('div');
+                        messageTextElement.classList.add('text');
+                        messageTextElement.textContent = message.message;
+                        messageElement.appendChild(messageTextElement);
+                        messagesContainer.appendChild(messageElement);
+                    }
+                });
+        }
+
+        const clearBtn = document.getElementById("clear-btn");
+        clearBtn.addEventListener("click", () => {
+            fetch('/messages/clear', { method: 'POST' })
+                .then(response => response.json())
+                .then(() => {
+                    messagesContainer.innerHTML = '';
+                    headerContainer.innerHTML = '';
+                    const headerElement = document.createElement('div');
+                    headerElement.classList.add('header');
+                    const dateHeaderElement = document.createElement('div');
+                    dateHeaderElement.classList.add('message-header');
+                    dateHeaderElement.classList.add('date-header');
+                    dateHeaderElement.textContent = 'Time';
+                    headerElement.appendChild(dateHeaderElement);
+                    const messageHeaderElement = document.createElement('div');
+                    messageHeaderElement.classList.add('message-header');
+                    messageHeaderElement.classList.add('text-header');
+                    messageHeaderElement.textContent = 'Message';
+                    headerElement.appendChild(messageHeaderElement);
+                    headerContainer.appendChild(headerElement);
+                });
+        });
+
+        setInterval(fetchMessages, 1000);  // Fetch messages every 1000ms (1 second)
+    </script>
+</body>
+</html>
